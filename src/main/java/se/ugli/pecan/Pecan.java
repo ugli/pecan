@@ -1,17 +1,20 @@
 package se.ugli.pecan;
 
-import java.io.IOException;
+import static java.util.Arrays.asList;
+import static java.util.Optional.empty;
+
 import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Pecan {
 
-    private static final List<String> RUNTIMES = Arrays.asList("se.ugli.pecan.j2v8.J2v8Runtime",
-            "se.ugli.pecan.nashorn.NashornRuntime");
+    private static final Logger LOG = LoggerFactory.getLogger(Pecan.class);
+    private static final List<String> RUNTIMES = asList("se.ugli.pecan.runtime.J2v8Runtime",
+            "se.ugli.pecan.runtime.NashornRuntime");
 
     private final JsRuntime runtime;
 
@@ -25,29 +28,30 @@ public class Pecan {
     }
 
     private static byte[] babelScript() {
-        try {
-            return Files.readAllBytes(Paths.get(Pecan.class.getResource("/babel-standalone-min-6.26.0.js").toURI()));
-        } catch (IOException | URISyntaxException e) {
-            throw new PecanException(e);
+        final Optional<byte[]> source = new BabelSourceService().getSource();
+        if (source.isPresent()) {
+            return source.get();
         }
+        throw new PecanException("No available Babel Script");
     }
 
     private static JsRuntime getRuntime() {
         for (final String runtime : RUNTIMES) {
-            final JsRuntime jsRuntime = createRuntime(runtime);
-            if (jsRuntime != null) {
-                return jsRuntime;
+            final Optional<JsRuntime> jsRuntime = createRuntime(runtime);
+            if (jsRuntime.isPresent()) {
+                return jsRuntime.get();
             }
         }
         throw new PecanException("No available runtime: " + RUNTIMES);
     }
 
-    private static JsRuntime createRuntime(final String runtime) {
+    private static Optional<JsRuntime> createRuntime(final String runtime) {
         try {
-            return (JsRuntime) Class.forName(runtime).getDeclaredConstructor().newInstance();
+            return Optional.of((JsRuntime) Class.forName(runtime).getDeclaredConstructor().newInstance());
         } catch (final NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | ClassNotFoundException e) {
-            return null;
+            LOG.info("Couldn't load runtime: " + runtime);
+            return empty();
         }
     }
 

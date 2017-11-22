@@ -1,4 +1,4 @@
-package se.ugli.pecan.nashorn;
+package se.ugli.pecan.runtime;
 
 import java.io.StringReader;
 
@@ -9,7 +9,7 @@ import javax.script.SimpleBindings;
 
 import se.ugli.pecan.JsRuntime;
 
-class NashornRuntime implements JsRuntime {
+public class NashornRuntime implements JsRuntime {
 
     final ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
     final SimpleBindings bindings = new SimpleBindings();

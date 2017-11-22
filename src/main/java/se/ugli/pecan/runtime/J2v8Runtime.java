@@ -1,4 +1,4 @@
-package se.ugli.pecan.j2v8;
+package se.ugli.pecan.runtime;
 
 import com.eclipsesource.v8.V8;
 
