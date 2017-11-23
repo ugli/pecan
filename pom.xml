@@ -6,7 +6,7 @@
 	<artifactId>pecan</artifactId>
 	<packaging>jar</packaging>
 	<name>pecan</name>
-	<version>1.8.0.0</version>
+	<version>1.8.0.1</version>
 	<description>pecan</description>
 	<url>https://github.com/ugli/pecan</url>
 	<licenses>
