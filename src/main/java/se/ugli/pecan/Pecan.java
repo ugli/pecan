@@ -18,7 +18,7 @@ public class Pecan {
 
     private final JsRuntime runtime;
 
-    public Pecan(JsRuntime runtime, byte[] babelScript) {
+    public Pecan(final JsRuntime runtime, final byte[] babelScript) {
         this.runtime = runtime;
         runtime.loadScript(babelScript);
     }
@@ -29,18 +29,16 @@ public class Pecan {
 
     private static byte[] babelScript() {
         final Optional<byte[]> source = new BabelSourceService().getSource();
-        if (source.isPresent()) {
+        if (source.isPresent())
             return source.get();
-        }
         throw new PecanException("No available Babel Script");
     }
 
     private static JsRuntime getRuntime() {
         for (final String runtime : RUNTIMES) {
             final Optional<JsRuntime> jsRuntime = createRuntime(runtime);
-            if (jsRuntime.isPresent()) {
+            if (jsRuntime.isPresent())
                 return jsRuntime.get();
-            }
         }
         throw new PecanException("No available runtime: " + RUNTIMES);
     }
@@ -48,23 +46,25 @@ public class Pecan {
     private static Optional<JsRuntime> createRuntime(final String runtime) {
         try {
             return Optional.of((JsRuntime) Class.forName(runtime).getDeclaredConstructor().newInstance());
-        } catch (final NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+        }
+        catch (final NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | ClassNotFoundException e) {
             LOG.info("Couldn't load runtime: " + runtime);
             return empty();
         }
     }
 
-    public String transform(String jsx) {
+    public String transform(final String jsx) {
         final StringBuilder script = new StringBuilder();
         script.append("Babel.transform('");
         script.append(replaceSpecChars(jsx));
         script.append("', { presets: ['react'] }).code");
+        System.out.println(script);
         return runtime.eval(script.toString());
     }
 
-    private String replaceSpecChars(String jsx) {
-        return jsx.replace("'", "\\x27");
+    private String replaceSpecChars(final String jsx) {
+        return jsx.replace("'", "\\x27").replaceAll("\n", " ").replaceAll("\r", " ");
     }
 
 }
