@@ -49,7 +49,7 @@ public class Pecan {
         }
         catch (final NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException | ClassNotFoundException e) {
-            LOG.info("Couldn't load runtime: " + runtime);
+            LOG.info("Couldn't load runtime: {}. {}" + runtime, e.getMessage());
             return empty();
         }
     }
@@ -59,11 +59,10 @@ public class Pecan {
         script.append("Babel.transform('");
         script.append(replaceSpecChars(jsx));
         script.append("', { presets: ['react'] }).code");
-        System.out.println(script);
         return runtime.eval(script.toString());
     }
 
-    private String replaceSpecChars(final String jsx) {
+    private static String replaceSpecChars(final String jsx) {
         return jsx.replace("'", "\\x27").replaceAll("\n", " ").replaceAll("\r", " ");
     }
 
